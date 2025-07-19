@@ -5,6 +5,10 @@ export type Appointment = {
   startsAt: Date;
   endsAt: Date;
 };
+export type MonthCalendar = {
+  date: Date;
+  monthCalendar: (DaySchedule | null)[][];
+};
 export type MonthlyData = {
   date: Date;
   monthAppointments: DaySchedule[];

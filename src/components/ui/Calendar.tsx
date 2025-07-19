@@ -1,52 +1,22 @@
-import { useMemo, type JSX } from "react";
-import type { DaySchedule, MonthlyData } from "../../types/CalendarTypes";
-import { Box, Grid, Typography, useTheme } from "@mui/material";
+import { type JSX } from "react";
+import type { MonthCalendar } from "../../types/CalendarTypes";
+import { Grid, Typography, useTheme } from "@mui/material";
 
 type CalendarProps = {
-  monthlyData: MonthlyData;
-  daysPerWeekNumber: number;
+  calendar: MonthCalendar[];
   selectedWeek: number;
+  selectedMonth: number;
 };
 
 function Calendar({
-  monthlyData,
-  daysPerWeekNumber,
+  calendar,
   selectedWeek,
+  selectedMonth,
 }: CalendarProps): JSX.Element {
   const theme = useTheme();
-  const calendar: (DaySchedule | null)[][] = useMemo(() => {
-    const numberOfMonthDays = new Date(
-      monthlyData.date.getFullYear(),
-      monthlyData.date.getMonth() + 1,
-      0
-    ).getDate();
-    const calendarWeeksNumber = Math.ceil(
-      numberOfMonthDays / daysPerWeekNumber
-    );
-    const firstDayNumberWithinWeek =
-      (monthlyData.monthAppointments[0].day.getDay() + 6) % 7;
-    const calendar = new Array(firstDayNumberWithinWeek)
-      .fill(null)
-      .concat(monthlyData.monthAppointments)
-      .concat(
-        new Array(
-          calendarWeeksNumber * daysPerWeekNumber -
-            numberOfMonthDays -
-            firstDayNumberWithinWeek
-        ).fill(null)
-      );
-    return calendar.reduce((acc, item, index) => {
-      const chunkIndex = Math.floor(index / daysPerWeekNumber);
-      if (!acc[chunkIndex]) {
-        acc[chunkIndex] = [];
-      }
-      acc[chunkIndex].push(item);
-      return acc;
-    }, [] as [][]);
-  }, [monthlyData, daysPerWeekNumber]);
   return (
     <Grid container justifyContent="center" alignItems="center" spacing="1vh">
-      {calendar[selectedWeek].map((day, index) =>
+      {calendar[selectedMonth].monthCalendar[selectedWeek].map((day, index) =>
         day ? (
           <Grid
             key={index}
@@ -114,12 +84,13 @@ function Calendar({
             alignItems="center"
             width="10vw"
             height="60vh"
-            boxShadow={theme.shadows[24]}
             borderRadius="2vh"
             spacing="0.5vh"
-          >
-            <Typography color={theme.palette.text.secondary}>...</Typography>
-          </Grid>
+            sx={{
+              filter: "blur(2px)",
+              backgroundColor: "rgba(60, 60, 60, 0.3)",
+            }}
+          ></Grid>
         )
       )}
     </Grid>
