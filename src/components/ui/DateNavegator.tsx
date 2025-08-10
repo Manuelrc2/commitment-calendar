@@ -6,15 +6,21 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 type DateNavegatorProps = {
   calendar: MonthCalendar[];
-  selectedWeekState: [number, React.Dispatch<React.SetStateAction<number>>];
-  selectedMonthState: [number, React.Dispatch<React.SetStateAction<number>>];
+  selectedWeekIndexState: [
+    number,
+    React.Dispatch<React.SetStateAction<number>>
+  ];
+  selectedMonthIndexState: [
+    number,
+    React.Dispatch<React.SetStateAction<number>>
+  ];
   setFetchNextMonths: React.Dispatch<React.SetStateAction<boolean>>;
   setFetchPreviousMonths: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function DateNavegator({
   calendar,
-  selectedWeekState: [selectedWeek, setSelectedWeek],
-  selectedMonthState: [selectedMonth, setSelectedMonth],
+  selectedWeekIndexState: [selectedWeek, setSelectedWeek],
+  selectedMonthIndexState: [selectedMonth, setSelectedMonth],
   setFetchNextMonths,
   setFetchPreviousMonths,
 }: DateNavegatorProps): JSX.Element {
