@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       const response = await fetch(
-        `https://localhost:7245/api/Authentication/Login`,
+        `https://localhost:7064/api/Authentication/Login`,
         {
           method: "POST",
           headers: {
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       const response = await fetch(
-        `https://localhost:7245/api/Authentication/Register`,
+        `https://localhost:7064/api/Authentication/Register`,
         {
           method: "POST",
           headers: {
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const response = await fetch(
-        `https://localhost:7245/api/Authentication/verify`,
+        `https://localhost:7064/api/Authentication/verify`,
         {
           method: "GET",
           headers: {

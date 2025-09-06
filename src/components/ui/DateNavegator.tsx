@@ -43,7 +43,7 @@ function DateNavegator({
           setFetchPreviousMonths(true);
         } else {
           setSelectedMonth((prev) => prev - 1);
-          setSelectedWeek(calendar[selectedMonth].monthCalendar.length - 1);
+          setSelectedWeek(calendar[selectedMonth - 1].monthCalendar.length - 1);
         }
       } else {
         setSelectedWeek((prev) => prev - 1);
@@ -58,7 +58,7 @@ function DateNavegator({
       height="10vh"
       width="50vw"
       boxShadow={theme.shadows[24]}
-      borderRadius="2vh"
+      borderRadius="1vh"
       sx={{ backgroundColor: theme.palette.secondary.main }}
     >
       <Button onClick={() => changeSelectedWeek("backwards")}>

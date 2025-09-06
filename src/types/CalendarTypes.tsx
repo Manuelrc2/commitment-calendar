@@ -1,4 +1,5 @@
 export type Appointment = {
+  id: number;
   name: string;
   description: string;
   stake: number;
