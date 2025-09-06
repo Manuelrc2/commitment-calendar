@@ -14,32 +14,48 @@ function MainPage(): JSX.Element {
   const [fetchNextMonths, setFetchNextMonths] = useState<boolean>(false);
   const [fetchPreviousMonths, setFetchPreviousMonths] =
     useState<boolean>(false);
+  const [fetchUpdate, setFetchUpdate] = useState<boolean>(false);
   const theme = useTheme();
-  const auth = useAuth();
-  const getMonthCalendar = async (userId: string, date: Date) => {
+  const { token } = useAuth();
+  const getMonthCalendar = async (date: Date) => {
     const response = await fetch(
-      `https://localhost:7245/api/Appointment/GetAppointmentsByUserAndDate?userId=${userId}&date=${date.toLocaleDateString()}`,
+      `https://localhost:7064/api/Appointment/GetAppointmentsByUserAndDate?date=${date.toLocaleDateString()}&timezone=${
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+      }`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
     return getCalendar(await response.json(), 7);
   };
   useEffect(() => {
-    getMonthCalendar("user123", new Date()).then((data) => setCalendar([data]));
+    getMonthCalendar(
+      new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    ).then((data) => setCalendar([data]));
   }, []);
+  console.log(calendar);
+  useEffect(() => {
+    if (fetchUpdate) {
+      getMonthCalendar(calendar[selectedMonthIndex].date).then((data) =>
+        setCalendar((prev) => [
+          ...prev.slice(0, selectedMonthIndex),
+          data,
+          ...prev.slice(selectedMonthIndex + 1),
+        ])
+      );
+      setFetchUpdate(false);
+    }
+  }, [fetchUpdate]);
   useEffect(() => {
     const fetchNextMonth = async () => {
       if (fetchNextMonths) {
         const nextMonthDate = new Date(calendar[selectedMonthIndex].date);
         nextMonthDate.setMonth(nextMonthDate.getMonth() + 1, 1);
-        const nextMonthCalendar = await getMonthCalendar(
-          "user123",
-          nextMonthDate
-        );
+        const nextMonthCalendar = await getMonthCalendar(nextMonthDate);
         setCalendar((prev) => [...prev, nextMonthCalendar]);
         setSelectedMonthIndex((prev) => prev + 1);
         setSelectedWeekIndex(0);
@@ -53,10 +69,7 @@ function MainPage(): JSX.Element {
       if (fetchPreviousMonths) {
         const previousMonthDate = new Date(calendar[selectedMonthIndex].date);
         previousMonthDate.setMonth(previousMonthDate.getMonth() - 1, 1);
-        const previousMonthCalendar = await getMonthCalendar(
-          "user123",
-          previousMonthDate
-        );
+        const previousMonthCalendar = await getMonthCalendar(previousMonthDate);
         setCalendar((prev) => [previousMonthCalendar, ...prev]);
         setSelectedMonthIndex(0);
         setSelectedWeekIndex(previousMonthCalendar.monthCalendar.length - 1);
@@ -89,6 +102,7 @@ function MainPage(): JSX.Element {
         calendar={calendar}
         selectedWeekIndex={selectedWeekIndex}
         selectedMonthIndex={selectedMonthIndex}
+        setFetchUpdate={setFetchUpdate}
       />
     </Grid>
   ) : (
