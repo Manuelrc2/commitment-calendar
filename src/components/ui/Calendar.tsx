@@ -1,7 +1,9 @@
 import { useState, type Dispatch, type JSX } from "react";
-import type { MonthCalendar } from "../../types/CalendarTypes";
+import type { Appointment, MonthCalendar } from "../../types/CalendarTypes";
 import { Button, Grid, Typography, useTheme } from "@mui/material";
 import CreateAppointmentDialog from "../CreateAppointmentDialog";
+import AppointmentDialog from "./AppointmentDialog";
+import AddIcon from "@mui/icons-material/Add";
 
 type CalendarProps = {
   calendar: MonthCalendar[];
@@ -18,7 +20,10 @@ function Calendar({
 }: CalendarProps): JSX.Element {
   const [createAppointmentDialogOpen, setCreateAppointmentDialogOpen] =
     useState<boolean>(false);
+  const [appointmentDialogOpen, setAppointmentDialogOpen] =
+    useState<boolean>(false);
   const [selectedDay, setSelectedDay] = useState<Date>();
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment>();
   const theme = useTheme();
   return (
     <Grid
@@ -88,40 +93,52 @@ function Calendar({
                   {day.appointments
                     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
                     .map((appointment, i) => (
-                      <Grid
-                        key={i}
-                        container
-                        direction="column"
-                        justifyContent="center"
-                        alignItems="center"
-                        width="9.5vw"
-                        height="6vh"
-                        borderRadius="1vh"
-                        sx={{ backgroundColor: "rgba(65, 65, 65, 0.49)" }}
+                      <Button
+                        sx={{
+                          padding: 0,
+                          borderRadius: "1vh",
+                          textTransform: "none",
+                        }}
+                        onClick={() => {
+                          setSelectedAppointment(appointment);
+                          setAppointmentDialogOpen(true);
+                        }}
                       >
-                        <Typography
-                          color={theme.palette.text.primary}
-                          fontSize="1.25vh"
+                        <Grid
+                          key={i}
+                          container
+                          direction="column"
+                          justifyContent="center"
+                          alignItems="center"
+                          width="9.5vw"
+                          height="6vh"
+                          borderRadius="1vh"
+                          sx={{ backgroundColor: "rgba(65, 65, 65, 0.49)" }}
                         >
-                          {appointment.name}
-                        </Typography>
-                        <Typography
-                          color={theme.palette.text.secondary}
-                          fontSize="1vh"
-                        >
-                          {appointment.startsAt.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          })}
-                          {" - "}
-                          {appointment.endsAt.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          })}
-                        </Typography>
-                      </Grid>
+                          <Typography
+                            color={theme.palette.text.primary}
+                            fontSize="1.25vh"
+                          >
+                            {appointment.name}
+                          </Typography>
+                          <Typography
+                            color={theme.palette.text.secondary}
+                            fontSize="1vh"
+                          >
+                            {appointment.startsAt.toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
+                            {" - "}
+                            {appointment.endsAt.toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
+                          </Typography>
+                        </Grid>
+                      </Button>
                     ))}
                 </Grid>
               </Grid>
@@ -137,7 +154,9 @@ function Calendar({
                   height: "3vh",
                   borderRadius: "1vh",
                 }}
-              ></Button>
+              >
+                <AddIcon />
+              </Button>
             </Grid>
           ) : (
             <Grid
@@ -157,14 +176,21 @@ function Calendar({
             ></Grid>
           )
       )}
-      <CreateAppointmentDialog
-        isOpenState={[
-          createAppointmentDialogOpen,
-          setCreateAppointmentDialogOpen,
-        ]}
-        date={selectedDay!}
-        setFetchUpdate={setFetchUpdate}
-      />
+      {appointmentDialogOpen && selectedAppointment && selectedDay && (
+        <AppointmentDialog
+          appointment={selectedAppointment}
+          date={selectedDay}
+          setIsOpen={setAppointmentDialogOpen}
+          setFetchUpdate={setFetchUpdate}
+        />
+      )}
+      {createAppointmentDialogOpen && selectedDay && (
+        <CreateAppointmentDialog
+          setIsOpen={setCreateAppointmentDialogOpen}
+          date={selectedDay}
+          setFetchUpdate={setFetchUpdate}
+        />
+      )}
     </Grid>
   );
 }
