@@ -25,13 +25,13 @@ import type { ProblemDetails } from "../types/GeneralTypes";
 import CloseIcon from "@mui/icons-material/Close";
 
 type CreateAppointmentDialogProps = {
-  isOpenState: [boolean, Dispatch<SetStateAction<boolean>>];
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
   date: Date;
   setFetchUpdate: Dispatch<React.SetStateAction<boolean>>;
 };
 
 function CreateAppointmentDialog({
-  isOpenState: [isOpen, setIsOpen],
+  setIsOpen,
   date,
   setFetchUpdate,
 }: CreateAppointmentDialogProps): JSX.Element {
@@ -43,18 +43,6 @@ function CreateAppointmentDialog({
   const theme = useTheme();
   const { token } = useAuth();
   dayjs.extend(utc);
-  useEffect(() => {
-    if (isOpen) {
-      setAppointment({
-        id: 0,
-        name: "",
-        description: "",
-        stake: 0,
-        startsAt: date,
-        endsAt: date,
-      });
-    }
-  }, [isOpen, date]);
   useEffect(() => {
     const createAppointment = async () => {
       const response = await fetch(
@@ -71,8 +59,8 @@ function CreateAppointmentDialog({
       if (!response.ok) {
         await response.json().then((data) => setProblemDetails(data));
       } else {
-        setIsOpen(false);
         setFetchUpdate(true);
+        setIsOpen(false);
       }
     };
     if (saveClicked) {
@@ -82,7 +70,7 @@ function CreateAppointmentDialog({
   }, [saveClicked, appointment, token]);
 
   return (
-    <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+    <Dialog open onClose={() => setIsOpen(false)}>
       <DialogTitle sx={{ backgroundColor: theme.palette.background.default }}>
         Add New Appointment
       </DialogTitle>
