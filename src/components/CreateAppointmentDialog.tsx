@@ -16,7 +16,7 @@ import {
   type JSX,
   type SetStateAction,
 } from "react";
-import type { Appointment } from "../types/CalendarTypes";
+import type { Appointment, AppointmentDto } from "../types/CalendarTypes";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -35,14 +35,49 @@ function CreateAppointmentDialog({
   date,
   setFetchUpdate,
 }: CreateAppointmentDialogProps): JSX.Element {
-  const [appointment, setAppointment] = useState<Appointment>(
-    {} as Appointment
-  );
+  const [appointment, setAppointment] = useState<AppointmentDto>({
+    id: 0,
+    name: "",
+    description: "",
+    stake: 0,
+    startsAt: null,
+    endsAt: null,
+  });
   const [saveClicked, setSaveClicked] = useState<boolean>();
   const [problemDetails, setProblemDetails] = useState<ProblemDetails>();
   const theme = useTheme();
   const { token } = useAuth();
   dayjs.extend(utc);
+  const validateAppointment = () => {
+    let valid = true;
+    const missingFields = [];
+    if (appointment.name === "") {
+      valid = false;
+      missingFields.push(" Name");
+    }
+    if (appointment.stake === 0) {
+      valid = false;
+      missingFields.push(" Stake");
+    }
+    if (appointment.startsAt === null) {
+      valid = false;
+      missingFields.push(" Starts At");
+    }
+    if (appointment.endsAt === null) {
+      valid = false;
+      missingFields.push(" Ends At");
+    }
+    if (!valid) {
+      setProblemDetails({
+        type: "",
+        title: "",
+        detail:
+          "You're missing the following fields:" + missingFields.toString(),
+        status: 0,
+      });
+    }
+    return valid;
+  };
   useEffect(() => {
     const createAppointment = async () => {
       const response = await fetch(
@@ -64,7 +99,9 @@ function CreateAppointmentDialog({
       }
     };
     if (saveClicked) {
-      createAppointment();
+      if (validateAppointment()) {
+        createAppointment();
+      }
       setSaveClicked(false);
     }
   }, [saveClicked, appointment, token]);

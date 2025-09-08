@@ -18,7 +18,7 @@ import {
   type JSX,
   type SetStateAction,
 } from "react";
-import type { Appointment } from "../../types/CalendarTypes";
+import type { Appointment, AppointmentDto } from "../../types/CalendarTypes";
 import type { ProblemDetails } from "../../types/GeneralTypes";
 import dayjs from "dayjs";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
@@ -26,6 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../../hooks/useAuth";
+import utc from "dayjs/plugin/utc";
 
 type AppointmentDialogProps = {
   appointment: Appointment;
@@ -40,7 +41,7 @@ function AppointmentDialog({
   setIsOpen,
   setFetchUpdate,
 }: AppointmentDialogProps): JSX.Element {
-  const [draftAppointment, setDraftAppointment] = useState<Appointment>({
+  const [draftAppointment, setDraftAppointment] = useState<AppointmentDto>({
     ...appointment,
   });
   const [saveClicked, setSaveClicked] = useState<boolean>();
@@ -51,7 +52,7 @@ function AppointmentDialog({
   const [newDate, setNewDate] = useState<Date>(date);
   const theme = useTheme();
   const { token } = useAuth();
-  console.log(draftAppointment);
+  dayjs.extend(utc);
   useEffect(() => {
     const deleteAppointment = async () => {
       const response = await fetch(
@@ -76,6 +77,31 @@ function AppointmentDialog({
       setDeletionConfirmed(false);
     }
   }, [deletionConfirmed, appointment, token]);
+  useEffect(() => {
+    const updateAppointment = async () => {
+      const response = await fetch(
+        "https://localhost:7064/api/Appointment/UpdateAppointment",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(draftAppointment),
+        }
+      );
+      if (!response.ok) {
+        await response.json().then((data) => setProblemDetails(data));
+      } else {
+        setFetchUpdate(true);
+        setIsOpen(false);
+      }
+    };
+    if (saveClicked) {
+      updateAppointment();
+      setSaveClicked(false);
+    }
+  }, [saveClicked, appointment, token]);
 
   return (
     <Dialog open onClose={() => setIsOpen(false)}>
@@ -157,7 +183,7 @@ function AppointmentDialog({
                   const dayjsPickedDate = dayjs(pickedDate);
                   console.log("dayjsPickedDate", dayjsPickedDate);
                   setDraftAppointment((prev) => {
-                    const dayjsStartAt = dayjs(prev.startsAt)
+                    const dayjsStartsAt = dayjs(prev.startsAt)
                       .year(dayjsPickedDate.year())
                       .month(dayjsPickedDate.month())
                       .date(dayjsPickedDate.date());
@@ -165,10 +191,10 @@ function AppointmentDialog({
                       .year(dayjsPickedDate.year())
                       .month(dayjsPickedDate.month())
                       .date(dayjsPickedDate.date());
-                    console.log("startAt", dayjsStartAt);
+                    console.log("startAt", dayjsStartsAt);
                     return {
                       ...prev,
-                      startsAt: dayjsStartAt.utc().toDate(),
+                      startsAt: dayjsStartsAt.utc().toDate(),
                       endsAt: dayjsEndsAt.utc().toDate(),
                     };
                   });

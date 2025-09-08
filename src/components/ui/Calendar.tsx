@@ -94,6 +94,7 @@ function Calendar({
                     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
                     .map((appointment, i) => (
                       <Button
+                        key={"button-" + i}
                         sx={{
                           padding: 0,
                           borderRadius: "1vh",
@@ -101,6 +102,7 @@ function Calendar({
                         }}
                         onClick={() => {
                           setSelectedAppointment(appointment);
+                          setSelectedDay(day.date);
                           setAppointmentDialogOpen(true);
                         }}
                       >
